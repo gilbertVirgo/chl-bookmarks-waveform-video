@@ -1,0 +1,6 @@
+.env
+node_modules
+*.wav
+*.mp4
+*.svg
+*.motn

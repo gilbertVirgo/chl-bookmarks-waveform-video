@@ -15,7 +15,7 @@ pkg-config --cflags librsvg-2.0
 make install # this took AGES!
 ```
 
-You have to install ffmpeg, but build it alongside librsvg (to handle the SVG images). The docs for this were terrible—or at least _I_ couldn't find them. I eventually got it working though.
+You have to install ffmpeg, but build it with librsvg (to handle the SVG images)—this is the `./configure ..` line. The docs for this were terrible—or at least _I_ couldn't find them. I eventually got it working though.
 
 In my folder of .svg images, I ran this command... 
 
