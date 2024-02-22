@@ -1,103 +1,35 @@
-const fs = require("fs"),
-	wav = require("node-wav"),
-	{ spawnSync } = require("child_process"),
-	FFT = require("fft-js");
-const pad = require("pad-number");
-const { rimrafSync } = require("rimraf");
+import { existsSync, mkdirSync } from "fs";
 
-const framesDirectoryPath = "./frames",
-	audioFilePath = "./audio.wav",
-	muteVideoFilePath = "./waveform-mute.mp4",
-	videoFilePath = "./waveform.mp4",
-	audioBuffer = fs.readFileSync(audioFilePath),
-	audioFile = wav.decode(audioBuffer),
-	[leftChannelData] = audioFile.channelData,
-	videoFrameRate = 25, // should be 25
-	sampleInterval = audioFile.sampleRate / videoFrameRate,
-	sliceSize = Math.pow(2, 10),
-	peaks = [],
-	spectrumSnapshots = [];
+import combineBackgroundVideoWithWaveformSync from "./combineBackgroundVideoWithWaveformSync.js";
+import generateImageWithIntervieweeText from "./generateImageWithIntervieweeText.js";
+import generateWaveformSync from "./generateWaveformSync.js";
+import minimist from "minimist";
+import { rimrafSync } from "rimraf";
+import { tempPath } from "./config.js";
 
-[videoFilePath, muteVideoFilePath].forEach((pathToRemove) => {
-	if (fs.existsSync(pathToRemove)) fs.rmSync(pathToRemove);
-});
+const args = minimist(process.argv.slice(2));
 
-rimrafSync(framesDirectoryPath);
-
-fs.mkdirSync(framesDirectoryPath);
-
-for (
-	let iterator = 0;
-	iterator < leftChannelData.length;
-	iterator += sampleInterval
-) {
-	const roundedIterator = Math.round(iterator);
-	const slice = leftChannelData.slice(
-		roundedIterator,
-		roundedIterator + sliceSize
+if (!args.i || !existsSync(args.i))
+	throw new Error(
+		"Must specify a valid audio input path (use the `-i` flag)"
 	);
+if (!args.o)
+	throw new Error("Must specify a video output path (use the `-o` flag)");
+if (!args.n) throw new Error("Must specify an interviewee (use the `-n` flag)");
 
-	let phasors;
+(async function () {
+	rimrafSync(tempPath);
+	mkdirSync(tempPath);
 
-	try {
-		phasors = FFT.fft(slice);
-	} catch (error) {
-		// The final slice isn't a multiple of 1024 so will throw an error. Just miss that off.
-		break;
-	}
+	console.log(1);
+	await generateImageWithIntervieweeText(args.n);
 
-	const spectrum = FFT.util.fftMag(phasors);
+	console.log(2);
+	generateWaveformSync(args.i);
 
-	spectrum.forEach((m, index) => {
-		if (
-			typeof peaks[index] === "undefined" ||
-			spectrum[index] > peaks[index]
-		)
-			peaks[index] = spectrum[index];
-	});
+	console.log(3);
+	combineBackgroundVideoWithWaveformSync(args.i, args.o);
 
-	spectrumSnapshots.push(spectrum);
-}
-
-const imageWidth = 1024,
-	imageHeight = 256,
-	largestPeak = Math.max(...peaks),
-	barWidth = imageWidth / spectrumSnapshots[0].length;
-
-spectrumSnapshots.forEach((spectrum, index) =>
-	fs.writeFileSync(
-		`${framesDirectoryPath}/${pad(index, 7)}.svg`,
-		`<svg width="${imageWidth}" height="${imageHeight}" viewBox="0 0 ${imageWidth} ${imageHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
-			${spectrum
-				.map((magnitude, index) => {
-					const barHeight = Math.round(
-						imageHeight * (1 / largestPeak) * magnitude
-					);
-
-					return `<rect x="${barWidth * index}" y="${
-						imageHeight - barHeight
-					}" width="${barWidth}" height="${barHeight}" fill="white" />`;
-				})
-				.join("\n")}
-			<!-- <text x="20" y="120" fill="white" style="font-size: 100px;">${index}</text> -->
-		</svg>`
-	)
-);
-
-spawnSync("ffmpeg", [
-	"-framerate",
-	videoFrameRate,
-	"-pattern_type",
-	"glob",
-	"-i",
-	`${framesDirectoryPath}/*.svg`,
-	muteVideoFilePath,
-]);
-
-spawnSync("ffmpeg", [
-	"-i",
-	audioFilePath,
-	"-i",
-	muteVideoFilePath,
-	videoFilePath,
-]);
+	console.log("Removing temp directory");
+	rimrafSync(tempPath);
+})();
