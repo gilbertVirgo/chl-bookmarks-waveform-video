@@ -7,7 +7,7 @@ import minimist from "minimist";
 import { rimrafSync } from "rimraf";
 import { tempPath } from "./config.js";
 
-const args = minimist(process.argv.slice(2));
+let args = minimist(process.argv.slice(2));
 
 if (!args.i || !existsSync(args.i))
 	throw new Error(

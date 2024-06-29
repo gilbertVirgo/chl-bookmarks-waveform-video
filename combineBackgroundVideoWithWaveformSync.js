@@ -3,7 +3,7 @@ import { imageWithIntervieweeTextPath, waveformVideoPath } from "./config.js";
 import { spawnSync } from "child_process";
 
 export default (audioPath, outputPath) => {
-	const { stdout, stderr } = spawnSync("ffmpeg", [
+	let { stdout, stderr } = spawnSync("ffmpeg", [
 		"-i",
 		imageWithIntervieweeTextPath,
 
@@ -37,5 +37,3 @@ export default (audioPath, outputPath) => {
 
 	console.log(stdout.toString(), stderr.toString());
 };
-
-// Looks awful and no audio. But it works ish

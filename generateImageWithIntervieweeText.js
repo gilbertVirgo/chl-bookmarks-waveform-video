@@ -11,7 +11,7 @@ import { fileURLToPath } from "url";
 import { resolve } from "path";
 import { writeFileSync } from "fs";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+let __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default async (interviewee) => {
 	// Juuuust can't get this to work. Of course...
@@ -20,10 +20,10 @@ export default async (interviewee) => {
 		family: "urw-antiqua",
 	});
 
-	const canvas = createCanvas(frameDimensions.width, frameDimensions.height),
+	let canvas = createCanvas(frameDimensions.width, frameDimensions.height),
 		context = canvas.getContext("2d");
 
-	const backgroundImage = await loadImage(backgroundImagePath);
+	let backgroundImage = await loadImage(backgroundImagePath);
 
 	context.drawImage(
 		backgroundImage,
@@ -55,7 +55,7 @@ export default async (interviewee) => {
 		intervieweeTextDimensions.offsetTop
 	);
 
-	const imageBuffer = canvas.toBuffer("image/jpeg");
+	let imageBuffer = canvas.toBuffer("image/jpeg");
 
 	writeFileSync(imageWithIntervieweeTextPath, imageBuffer);
 };

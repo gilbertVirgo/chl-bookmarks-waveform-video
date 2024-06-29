@@ -19,7 +19,7 @@ import { spawnSync } from "child_process";
 import wav from "node-wav";
 
 export default (audioPath) => {
-	const audioBuffer = fs.readFileSync(audioPath),
+	let audioBuffer = fs.readFileSync(audioPath),
 		audioFile = wav.decode(audioBuffer),
 		progressBar = new cliProgress.SingleBar(
 			{},
@@ -38,11 +38,11 @@ export default (audioPath) => {
 	//    ****
 	//        *******
 
-	const spectrumLength = 512, // this is the fft-js default
+	let spectrumLength = 512, // this is the fft-js default
 		bloatedSpectrumFilter = Array(spectrumLength)
 			.fill(null)
 			.map((x, index) => {
-				const maxRadians = (Math.PI * 2) / 4; // 90º
+				let maxRadians = (Math.PI * 2) / 4; // 90º
 				return (
 					Math.random() >
 					Math.sin((maxRadians / spectrumLength) * index)
@@ -56,8 +56,8 @@ export default (audioPath) => {
 		iterator < leftChannelData.length;
 		iterator += sampleInterval
 	) {
-		const roundedIterator = Math.round(iterator);
-		const slice = leftChannelData.slice(
+		let roundedIterator = Math.round(iterator);
+		let slice = leftChannelData.slice(
 			roundedIterator,
 			roundedIterator + sampleSliceSize
 		);
@@ -71,7 +71,7 @@ export default (audioPath) => {
 			break;
 		}
 
-		const fullSpectrum = FFT.util.fftMag(phasors),
+		let fullSpectrum = FFT.util.fftMag(phasors),
 			bloatedSpectrum = fullSpectrum.filter(
 				(m, index) => bloatedSpectrumFilter[index]
 			),
@@ -95,12 +95,12 @@ export default (audioPath) => {
 
 	progressBar.stop();
 
-	const largestPeak = Math.max(...peaks),
+	let largestPeak = Math.max(...peaks),
 		barWidth =
 			waveformDimensions.width / spectrumSnapshots[0].length -
 			gutterBetweenWaveformBars;
 
-	const roundToNearestTenth = (number) => Math.round(number / 10) * 10;
+	let roundToNearestTenth = (number) => Math.round(number / 10) * 10;
 
 	spectrumSnapshots.forEach((spectrum, index) =>
 		fs.writeFileSync(
@@ -112,7 +112,7 @@ export default (audioPath) => {
 			}" fill="black" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 			${spectrum
 				.map((magnitude, index) => {
-					const barHeight = roundToNearestTenth(
+					let barHeight = roundToNearestTenth(
 							Math.round(
 								waveformDimensions.height *
 									(1 / largestPeak) *
