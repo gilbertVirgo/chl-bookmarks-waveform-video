@@ -1,7 +1,10 @@
 import {
 	frameDimensions,
 	framesPath,
+	frequencySpectrumLength,
 	gutterBetweenWaveformBars,
+	maxFrequency,
+	minFrequency,
 	numberOfWaveformBars,
 	sampleSliceSize,
 	videoFrameRate,
@@ -38,16 +41,15 @@ export default (audioPath) => {
 	//    ****
 	//        *******
 
-	let spectrumLength = 512, // this is the fft-js default
-		bloatedSpectrumFilter = Array(spectrumLength)
-			.fill(null)
-			.map((x, index) => {
-				let maxRadians = (Math.PI * 2) / 4; // 90º
-				return (
-					Math.random() >
-					Math.sin((maxRadians / spectrumLength) * index)
-				);
-			});
+	let bloatedSpectrumFilter = Array(frequencySpectrumLength)
+		.fill(null)
+		.map((x, index) => {
+			let maxRadians = (Math.PI * 2) / 4; // 90º
+			return (
+				Math.random() >
+				Math.sin((maxRadians / frequencySpectrumLength) * index)
+			);
+		});
 
 	progressBar.start(leftChannelData.length, 0);
 
@@ -72,12 +74,13 @@ export default (audioPath) => {
 		}
 
 		let fullSpectrum = FFT.util.fftMag(phasors),
-			bloatedSpectrum = fullSpectrum.filter(
-				(m, index) => bloatedSpectrumFilter[index]
-			),
+			// filteredSpectrum = fullSpectrum.filter(
+			// 	(m, index) => bloatedSpectrumFilter[index]
+			// ),
+			filteredSpectrum = fullSpectrum.slice(minFrequency, maxFrequency),
 			simplifiedSpectrum = chunk(
-				bloatedSpectrum,
-				bloatedSpectrum.length / numberOfWaveformBars
+				filteredSpectrum,
+				filteredSpectrum.length / numberOfWaveformBars
 			).map((magnitudes) => average(magnitudes));
 
 		simplifiedSpectrum.forEach((m, index) => {

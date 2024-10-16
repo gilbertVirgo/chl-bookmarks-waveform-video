@@ -12,7 +12,10 @@ export let imageWithIntervieweeTextPath = join(
 	"image-with-interviewee-text.jpg"
 );
 export let backgroundVideoPath = join(tempPath, "background-video.mp4");
-export let videoFrameRate = 25;
+export let videoFrameRate = 15;
+export let frequencySpectrumLength = 512; // fft-js default (don't change)
+export let minFrequency = Math.floor((100 / 20000) * frequencySpectrumLength); // 100Hz
+export let maxFrequency = Math.floor((8000 / 20000) * frequencySpectrumLength); // 8kHz
 export let sampleSliceSize = Math.pow(2, 10);
 export let backgroundImagePath = join(__dirname, "images", "background.jpg");
 export let frameDimensions = {

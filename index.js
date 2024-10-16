@@ -21,15 +21,17 @@ if (!args.n) throw new Error("Must specify an interviewee (use the `-n` flag)");
 	rimrafSync(tempPath);
 	mkdirSync(tempPath);
 
-	console.log(1);
+	console.log("Generating background");
 	await generateImageWithIntervieweeText(args.n);
 
-	console.log(2);
+	console.log("Generating waveform");
 	generateWaveformSync(args.i);
 
-	console.log(3);
+	console.log("Combining background & waveform");
 	combineBackgroundVideoWithWaveformSync(args.i, args.o);
 
 	console.log("Removing temp directory");
 	rimrafSync(tempPath);
+
+	console.log("Finished. See", args.o);
 })();

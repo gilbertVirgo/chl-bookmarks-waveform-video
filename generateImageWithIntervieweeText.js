@@ -6,16 +6,9 @@ import {
 } from "./config.js";
 import { createCanvas, loadImage, registerFont } from "canvas";
 
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { resolve } from "path";
 import { writeFileSync } from "fs";
 
-let __dirname = dirname(fileURLToPath(import.meta.url));
-
 export default async (interviewee) => {
-	// Juuuust can't get this to work. Of course...
-
 	registerFont("urw-antiqua.ttf", {
 		family: "urw-antiqua",
 	});
